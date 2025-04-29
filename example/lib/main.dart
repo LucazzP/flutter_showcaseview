@@ -15,85 +15,125 @@ final GlobalKey _lastShowcaseWidget = GlobalKey();
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+  static final settingsNavigator = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter ShowCase',
-      theme: ThemeData(
-        primaryColor: const Color(0xffEE5366),
-      ),
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: ShowCaseWidget(
-          hideFloatingActionWidgetForShowcase: [_lastShowcaseWidget],
-          globalFloatingActionWidget: (showcaseContext) => FloatingActionWidget(
-            left: 16,
-            bottom: 16,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: ShowCaseWidget.of(showcaseContext).dismiss,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffEE5366),
-                ),
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
-                ),
+        title: 'Flutter ShowCase',
+        theme: ThemeData(
+          primaryColor: const Color(0xffEE5366),
+        ),
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: MyPage(),
+        ));
+  }
+}
+
+class MyPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: FilledButton(
+            onPressed: () {
+              showModalBottomSheet(
+                  context: context,
+                  useRootNavigator: true,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  builder: (context) => NavigatorPopHandler(
+                        // onPopWithResult: (value) {
+                        //   MyApp.settingsNavigator.currentState!.maybePop();
+                        // },
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width - 26,
+                              maxHeight:
+                                  MediaQuery.of(context).size.height - 100),
+                          child: Navigator(
+                            key: MyApp.settingsNavigator,
+                            onGenerateInitialRoutes:
+                                (navigator, initialRoute) => [
+                              MaterialPageRoute(
+                                builder: (context) => _getBottomSheet(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ));
+            },
+            child: Text("open bottom sheet")));
+  }
+
+  Widget _getBottomSheet(BuildContext context) {
+    return ShowCaseWidget(
+      hideFloatingActionWidgetForShowcase: [_lastShowcaseWidget],
+      globalFloatingActionWidget: (showcaseContext) => FloatingActionWidget(
+        left: 16,
+        bottom: 16,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: ShowCaseWidget.of(showcaseContext).dismiss,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xffEE5366),
+            ),
+            child: const Text(
+              'Skip',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
               ),
             ),
           ),
-          onStart: (index, key) {
-            log('onStart: $index, $key');
-          },
-          onComplete: (index, key) {
-            log('onComplete: $index, $key');
-            if (index == 4) {
-              SystemChrome.setSystemUIOverlayStyle(
-                SystemUiOverlayStyle.light.copyWith(
-                  statusBarIconBrightness: Brightness.dark,
-                  statusBarColor: Colors.white,
-                ),
-              );
-            }
-          },
-          blurValue: 1,
-          autoPlayDelay: const Duration(seconds: 3),
-          builder: (context) => const MailPage(),
-          globalTooltipActionConfig: const TooltipActionConfig(
-            position: TooltipActionPosition.inside,
-            alignment: MainAxisAlignment.spaceBetween,
-            actionGap: 20,
-          ),
-          globalTooltipActions: [
-            // Here we don't need previous action for the first showcase widget
-            // so we hide this action for the first showcase widget
-            TooltipActionButton(
-              type: TooltipDefaultActionType.previous,
-              textStyle: const TextStyle(
-                color: Colors.white,
-              ),
-              hideActionWidgetForShowcase: [_firstShowcaseWidget],
-            ),
-            // Here we don't need next action for the last showcase widget so we
-            // hide this action for the last showcase widget
-            TooltipActionButton(
-              type: TooltipDefaultActionType.next,
-              textStyle: const TextStyle(
-                color: Colors.white,
-              ),
-              hideActionWidgetForShowcase: [_lastShowcaseWidget],
-            ),
-          ],
-          onDismiss: (key) {
-            debugPrint('Dismissed at $key');
-          },
         ),
       ),
+      onStart: (index, key) {
+        log('onStart: $index, $key');
+      },
+      onComplete: (index, key) {
+        log('onComplete: $index, $key');
+        if (index == 4) {
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle.light.copyWith(
+              statusBarIconBrightness: Brightness.dark,
+              statusBarColor: Colors.white,
+            ),
+          );
+        }
+      },
+      blurValue: 1,
+      autoPlayDelay: const Duration(seconds: 3),
+      builder: (context) => const MailPage(),
+      globalTooltipActionConfig: const TooltipActionConfig(
+        position: TooltipActionPosition.inside,
+        alignment: MainAxisAlignment.spaceBetween,
+        actionGap: 20,
+      ),
+      globalTooltipActions: [
+        // Here we don't need previous action for the first showcase widget
+        // so we hide this action for the first showcase widget
+        TooltipActionButton(
+          type: TooltipDefaultActionType.previous,
+          textStyle: const TextStyle(
+            color: Colors.white,
+          ),
+          hideActionWidgetForShowcase: [_firstShowcaseWidget],
+        ),
+        // Here we don't need next action for the last showcase widget so we
+        // hide this action for the last showcase widget
+        TooltipActionButton(
+          type: TooltipDefaultActionType.next,
+          textStyle: const TextStyle(
+            color: Colors.white,
+          ),
+          hideActionWidgetForShowcase: [_lastShowcaseWidget],
+        ),
+      ],
+      onDismiss: (key) {
+        debugPrint('Dismissed at $key');
+      },
     );
   }
 }

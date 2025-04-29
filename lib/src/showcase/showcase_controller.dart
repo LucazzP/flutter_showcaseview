@@ -129,6 +129,57 @@ class ShowcaseController {
     });
   }
 
+  /// Finds the appropriate ancestor render object for positioning
+  ///
+  /// This method determines the correct render object to use as the ancestor
+  /// when calculating positions, handling both standard cases and nested navigators.
+  ///
+  /// Returns the render object to use as the ancestor for position calculations.
+  RenderObject? _findAppropriateAncestor() {
+    if (!_mounted) return null;
+
+    // First try to detect if we're in a nested navigator situation
+    bool isInNestedNavigator = false;
+
+    try {
+      // Check if we have a navigator ancestor that's not the root
+      final context = _context;
+      final rootNavigator = Navigator.maybeOf(context, rootNavigator: true);
+      final directNavigator = Navigator.maybeOf(context, rootNavigator: false);
+
+      // If these are different, we're in a nested navigator
+      isInNestedNavigator = rootNavigator != directNavigator &&
+          directNavigator != null &&
+          rootNavigator != null;
+    } catch (_) {
+      // Ignore errors, assume not nested
+    }
+
+    // If we're not in a nested navigator, use the root render object
+    if (!isInNestedNavigator) {
+      return rootRenderObject;
+    }
+
+    // We're in a nested navigator - find the appropriate render object
+    RenderObject? nearestAppropriateAncestor;
+
+    try {
+      // Try to find the overlay from our current navigator
+      final context = _context;
+      final navigator = Navigator.of(context, rootNavigator: false);
+      final overlay = navigator.overlay;
+
+      if (overlay != null) {
+        final overlayContext = overlay.context;
+        nearestAppropriateAncestor = overlayContext.findRenderObject();
+      }
+    } catch (_) {
+      // If we can't find the overlay or there's an error, fall back to root
+    }
+
+    return nearestAppropriateAncestor ?? rootRenderObject;
+  }
+
   /// Updates the controller's data when the showcase position or size changes
   ///
   /// Rebuilds the showcase overlay with updated positioning information.
@@ -142,8 +193,12 @@ class ShowcaseController {
     final renderBox = _context.findRenderObject() as RenderBox?;
     final screenSize = MediaQuery.of(_context).size;
     final size = rootWidgetSize ?? screenSize;
+
+    // Use the appropriate ancestor for position calculation
+    final ancestorRenderObject = _findAppropriateAncestor();
+
     final newPosition = GetPosition(
-      rootRenderObject: rootRenderObject,
+      rootRenderObject: ancestorRenderObject,
       renderBox: renderBox,
       padding: config.targetPadding,
       screenWidth: size.width,
@@ -269,8 +324,12 @@ class ShowcaseController {
         .globalFloatingActionWidget(config.showcaseKey)
         ?.call(_context);
     final size = rootWidgetSize ?? MediaQuery.of(_context).size;
+
+    // Use the appropriate ancestor for position calculation
+    final ancestorRenderObject = _findAppropriateAncestor();
+
     position ??= GetPosition(
-      rootRenderObject: rootRenderObject,
+      rootRenderObject: ancestorRenderObject,
       renderBox: _context.findRenderObject() as RenderBox?,
       padding: config.targetPadding,
       screenWidth: size.width,
