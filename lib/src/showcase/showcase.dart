@@ -84,8 +84,7 @@ class Showcase extends StatefulWidget {
     this.movingAnimationDuration = const Duration(milliseconds: 2000),
     this.disableMovingAnimation,
     this.disableScaleAnimation,
-    this.tooltipPadding =
-        const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+    this.tooltipPadding = const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
     this.onToolTipClick,
     this.targetPadding = EdgeInsets.zero,
     this.blurValue,
@@ -201,8 +200,8 @@ class Showcase extends StatefulWidget {
     this.enableAutoScroll,
     this.toolTipMargin = 14,
     this.targetTooltipGap = 10,
-  })  : showArrow = false,
-        onToolTipClick = null,
+    this.showArrow = false,
+  })  : onToolTipClick = null,
         scaleAnimationDuration = const Duration(milliseconds: 300),
         scaleAnimationCurve = Curves.decelerate,
         scaleAnimationAlignment = null,
@@ -588,8 +587,7 @@ class _ShowcaseState extends State<Showcase> {
       scope: _showCaseWidgetManager.name,
     );
     ShowcaseService.instance.addController(
-      controller: _controller
-        ..showcaseView = _showCaseWidgetManager.showcaseView,
+      controller: _controller..showcaseView = _showCaseWidgetManager.showcaseView,
       key: widget.showcaseKey,
       id: _uniqueId,
       scope: _showCaseWidgetManager.name,

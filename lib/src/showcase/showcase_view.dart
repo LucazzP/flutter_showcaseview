@@ -246,7 +246,7 @@ class ShowcaseView {
   /// Will finish entire showcase if no more widgets to show.
   void completed(GlobalKey? key) {
     if (_activeWidgetId == null ||
-        _ids?[_activeWidgetId!] != key ||
+        (key != null &&_ids?[_activeWidgetId!] != key) ||
         !_mounted) {
       return;
     }
